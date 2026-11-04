@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel da Anfitriã 🌸 Controle de Presença</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body class="pagina-admin">
+
+  <!-- Molduras florais discretas nos cantos superiores -->
+  <div class="moldura-canto topo-esquerdo" style="opacity: 0.45;" aria-hidden="true">
+    <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 140 C40 120, 75 95, 95 50 C60 65, 30 95, 10 140 Z" fill="#4D9078"/>
+      <circle cx="52" cy="26" r="16" fill="#E85D88"/>
+      <circle cx="76" cy="45" r="16" fill="#F0789E"/>
+      <circle cx="66" cy="72" r="16" fill="#E85D88"/>
+      <circle cx="38" cy="72" r="16" fill="#F0789E"/>
+      <circle cx="28" cy="45" r="16" fill="#E85D88"/>
+      <circle cx="52" cy="52" r="11" fill="#F9C74F"/>
+    </svg>
+  </div>
+
+  <div class="moldura-canto topo-direito" style="opacity: 0.45;" aria-hidden="true">
+    <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M10 140 C40 120, 75 95, 95 50 C60 65, 30 95, 10 140 Z" fill="#4D9078"/>
+      <circle cx="52" cy="26" r="16" fill="#FF6F61"/>
+      <circle cx="76" cy="45" r="16" fill="#E85D88"/>
+      <circle cx="66" cy="72" r="16" fill="#FF6F61"/>
+      <circle cx="38" cy="72" r="16" fill="#E85D88"/>
+      <circle cx="28" cy="45" r="16" fill="#FF6F61"/>
+      <circle cx="52" cy="52" r="11" fill="#F9C74F"/>
+    </svg>
+  </div>
+
+  <main class="container-admin">
+
+    <!-- ======================================================================
+         TELA DE LOGIN POR SENHA
+         ====================================================================== -->
+    <section id="secao-login-admin" class="card-login-admin">
+      <div style="font-size: 2.4rem; margin-bottom: 6px;">🌸</div>
+      <h2>Painel da Anfitriã</h2>
+      <p>Digite a senha de acesso para visualizar e gerenciar a lista de presença.</p>
+
+      <div class="alerta-erro" id="erro-login-admin" role="alert">
+        <span>🔒</span>
+        <span id="texto-erro-login">Senha incorreta. Tente novamente.</span>
+      </div>
+
+      <form id="form-login-admin">
+        <div class="grupo-campo" style="text-align: left;">
+          <label class="rotulo-campo" for="campo-senha-admin">Senha do painel</label>
+          <input
+            type="password"
+            id="campo-senha-admin"
+            class="input-texto"
+            placeholder="Digite a senha..."
+            required
+          />
+        </div>
+        <button type="submit" class="botao-principal">
+          🔓 Entrar no Painel
+        </button>
+      </form>
+
+      <p style="margin-top: 18px; font-size: 0.84rem;">
+        <a href="/" style="color: var(--texto-medio);">← Voltar para a página do convite</a>
+      </p>
+    </section>
+
+    <!-- ======================================================================
+         CONTEÚDO DO PAINEL (EXIBIDO APÓS LOGIN)
+         ====================================================================== -->
+    <section id="secao-painel-admin" style="display: none;">
+
+      <!-- Cabeçalho do Painel -->
+      <header class="cabecalho-admin">
+        <div class="titulo-admin-bloco">
+          <h1>🌸 Painel da Anfitriã — <span id="admin-nome-festa">Aniversário</span></h1>
+          <p>Acompanhe em tempo real todas as confirmações de presença, acompanhantes e recados.</p>
+        </div>
+
+        <div class="acoes-topo-admin">
+          <button type="button" class="botao-acao-admin secundario" id="btn-atualizar-lista">
+            🔄 Atualizar
+          </button>
+          <a href="/" class="botao-acao-admin secundario">
+            💐 Ver Convite
+          </a>
+          <button type="button" class="botao-acao-admin secundario" id="btn-sair-admin">
+            🚪 Sair
+          </button>
+        </div>
+      </header>
+
+      <!-- Resumo no Topo -->
+      <div class="grade-resumo">
+        <div class="card-resumo destaque-total">
+          <span class="rotulo-resumo">Total de Pessoas na Festa</span>
+          <span class="valor-resumo" id="resumo-total-pessoas">0</span>
+          <span class="detalhe-resumo" id="resumo-detalhe-pessoas">
+            Contando convidados confirmados + acompanhantes
+          </span>
+        </div>
+
+        <div class="card-resumo confirmados">
+          <span class="rotulo-resumo">Confirmados (Vão)</span>
+          <span class="valor-resumo" id="resumo-confirmados">0</span>
+          <span class="detalhe-resumo" id="resumo-acompanhantes">
+            + 0 acompanhantes
+          </span>
+        </div>
+
+        <div class="card-resumo recusas">
+          <span class="rotulo-resumo">Recusas (Não vão)</span>
+          <span class="valor-resumo" id="resumo-recusas">0</span>
+          <span class="detalhe-resumo">Avisaram que não poderão ir</span>
+        </div>
+
+        <div class="card-resumo acompanhantes">
+          <span class="rotulo-resumo">Total de Respostas</span>
+          <span class="valor-resumo" id="resumo-total-respostas">0</span>
+          <span class="detalhe-resumo">Formulários enviados</span>
+        </div>
+      </div>
+
+      <!-- Barra de Busca, Filtro e Exportação de Planilha -->
+      <div class="barra-ferramentas-admin">
+        <div class="filtros-busca">
+          <input
+            type="search"
+            id="input-busca"
+            class="input-busca-admin"
+            placeholder="🔍 Buscar por nome, telefone, acompanhante ou restrição..."
+          />
+
+          <div class="grupo-botoes-filtro" role="group" aria-label="Filtrar por status">
+            <button type="button" class="botao-filtro ativo" data-filtro="todos">
+              Todos
+            </button>
+            <button type="button" class="botao-filtro" data-filtro="Sim">
+              ✅ Confirmados
+            </button>
+            <button type="button" class="botao-filtro" data-filtro="Não">
+              💌 Não vão
+            </button>
+          </div>
+        </div>
+
+        <div class="botoes-exportar">
+          <button type="button" class="botao-acao-admin xlsx" id="btn-baixar-xlsx">
+            📊 Baixar Planilha (.xlsx)
+          </button>
+          <button type="button" class="botao-acao-admin csv" id="btn-baixar-csv">
+            📄 Baixar (.csv)
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabela de Respostas -->
+      <div class="card-tabela-admin">
+        <div class="tabela-responsiva">
+          <table class="tabela-admin">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>Status</th>
+                <th>Nº Acomp.</th>
+                <th>Nomes dos Acompanhantes</th>
+                <th>Restrição Alimentar</th>
+                <th>Mensagem Carinhosa</th>
+                <th>Data/Hora</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="corpo-tabela-respostas">
+              <!-- Preenchido via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="estado-vazio-tabela" class="estado-vazio" style="display: none;">
+          <div style="font-size: 2rem; margin-bottom: 8px;">🌷</div>
+          <p id="texto-estado-vazio">Nenhuma confirmação de presença registrada até o momento.</p>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,19 @@
+{
+  "name": "rsvp-festa-flores",
+  "version": "1.0.0",
+  "description": "Site completo de confirmação de presença (RSVP) para aniversário com tema Flores Coloridas",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "sqlite3": "^5.1.7",
+    "xlsx": "^0.18.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+
