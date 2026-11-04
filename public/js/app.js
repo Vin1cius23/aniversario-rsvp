@@ -6,16 +6,15 @@
 
 // Valores padrão caso o servidor ainda esteja carregando (sincronizados com config.js)
 let DADOS_FESTA = {
-  nomeAniversariante: "Helena",
-  idade: "30 anos",
-  dataHoraTexto: "12 de Dezembro de 2026, Sábado, às 16h00",
-  dataHoraISO: "2026-12-12T16:00:00-03:00",
+  nomeAniversariante: "Maria Eduarda",
+  idade: "21 anos",
+  dataHoraTexto: "16 de Janeiro de 2027, Sábado",
+  dataHoraISO: "2027-01-16T19:00:00-03:00",
   duracaoHoras: 6,
-  nomeLocal: "Espaço Jardim das Flores",
-  enderecoLocal: "Rua das Orquídeas, 250 - Jardim Botânico, São Paulo - SP",
-  linkMapa: "https://www.google.com/maps/search/?api=1&query=Rua+das+Orquideas+250+Jardim+Botanico+Sao+Paulo",
-  observacoes: "Traje sugerido: Esporte Fino ou tons primaveris/florais. Confirme sua presença até o dia 01/12 para prepararmos tudo com muito carinho!",
-  fraseConvite: "Um novo ciclo floresce e a sua presença tornará nosso jardim ainda mais especial!"
+  nomeLocal: "Local da Festa",
+  enderecoLocal: "R. Argino da Silva Leite, 181 - Santa Rita, Piracicaba - SP, 13423-215",
+  linkMapa: "https://www.google.com/maps/search/?api=1&query=R.+Argino+da+Silva+Leite,+181+-+Santa+Rita,+Piracicaba+-+SP,+13423-215",
+  fraseConvite: "Um novo ciclo floresce e a sua presença tornará esse dia ainda mais especial!"
 };
 
 // ============================================================================
@@ -47,14 +46,13 @@ function aplicarDadosNaPagina() {
   document.getElementById("el-data-hora").textContent = DADOS_FESTA.dataHoraTexto;
   document.getElementById("el-nome-local").textContent = DADOS_FESTA.nomeLocal;
   document.getElementById("el-endereco-local").textContent = DADOS_FESTA.enderecoLocal;
-  document.getElementById("el-observacoes").textContent = DADOS_FESTA.observacoes;
 
   const linkMapaEl = document.getElementById("el-link-mapa");
   const urlMapa =
     DADOS_FESTA.linkMapa && DADOS_FESTA.linkMapa.trim() !== ""
       ? DADOS_FESTA.linkMapa
       : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-          `${DADOS_FESTA.nomeLocal} ${DADOS_FESTA.enderecoLocal}`
+          DADOS_FESTA.enderecoLocal
         )}`;
   linkMapaEl.href = urlMapa;
 }
@@ -268,7 +266,6 @@ formRsvp.addEventListener("submit", async (e) => {
     }
   }
 
-  const restricaoAlimentar = document.getElementById("campo-restricao").value.trim();
   const mensagem = document.getElementById("campo-mensagem").value.trim();
 
   // Envia para o servidor
@@ -285,7 +282,6 @@ formRsvp.addEventListener("submit", async (e) => {
         comparecer,
         qtd_acompanhantes: qtdAcompanhantes,
         nomes_acompanhantes: nomesAcompanhantes,
-        restricao_alimentar: restricaoAlimentar,
         mensagem
       })
     });
@@ -369,8 +365,8 @@ function configurarLinksCalendario() {
   const fim = new Date(inicio.getTime() + duracaoMs);
 
   const tituloEvento = `🌸 Aniversário de ${DADOS_FESTA.nomeAniversariante} (${DADOS_FESTA.idade})`;
-  const localCompleto = `${DADOS_FESTA.nomeLocal} - ${DADOS_FESTA.enderecoLocal}`;
-  const descricaoEvento = `${DADOS_FESTA.fraseConvite}\n\nObservações: ${DADOS_FESTA.observacoes}`;
+  const localCompleto = DADOS_FESTA.enderecoLocal;
+  const descricaoEvento = DADOS_FESTA.fraseConvite;
 
   // Link do Google Calendar
   const datasGoogle = `${formatarDataCalendarioUTC(inicio)}/${formatarDataCalendarioUTC(fim)}`;

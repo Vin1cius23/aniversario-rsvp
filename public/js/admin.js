@@ -204,7 +204,6 @@ function renderizarTabela() {
       <td><span class="badge-status ${badgeClasse}">${badgeTexto}</span></td>
       <td style="text-align: center; font-weight: 600;">${r.comparecer === "Sim" ? r.qtd_acompanhantes : 0}</td>
       <td>${r.nomes_acompanhantes ? escaparHTML(r.nomes_acompanhantes) : '<span style="color:#B09FA1;">—</span>'}</td>
-      <td>${r.restricao_alimentar ? escaparHTML(r.restricao_alimentar) : '<span style="color:#B09FA1;">—</span>'}</td>
       <td>${r.mensagem ? escaparHTML(r.mensagem) : '<span style="color:#B09FA1;">—</span>'}</td>
       <td style="font-size: 0.8rem; color: var(--texto-medio); white-space: nowrap;">${escaparHTML(r.data_resposta)}</td>
       <td>

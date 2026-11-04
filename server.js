@@ -363,14 +363,13 @@ app.get("/api/admin/export/:formato", autenticarAdmin, (req, res) => {
       return res.status(500).send("Erro ao gerar arquivo de exportação.");
     }
 
-    // Formata as colunas exatamente como solicitado
+    // Formata as colunas da planilha
     const dadosPlanilha = rows.map((r) => ({
       "Nome": r.nome,
       "Telefone": r.telefone,
       "Status": r.comparecer === "Sim" ? "Confirmado (Sim)" : "Não irá (Não)",
       "Nº de acompanhantes": r.comparecer === "Sim" ? r.qtd_acompanhantes : 0,
       "Nomes dos acompanhantes": r.nomes_acompanhantes || "-",
-      "Restrição alimentar": r.restricao_alimentar || "-",
       "Mensagem": r.mensagem || "-",
       "Data/hora da resposta": r.data_resposta
     }));
@@ -382,7 +381,6 @@ app.get("/api/admin/export/:formato", autenticarAdmin, (req, res) => {
       "Status",
       "Nº de acompanhantes",
       "Nomes dos acompanhantes",
-      "Restrição alimentar",
       "Mensagem",
       "Data/hora da resposta"
     ];
@@ -399,7 +397,6 @@ app.get("/api/admin/export/:formato", autenticarAdmin, (req, res) => {
       { wch: 18 }, // Status
       { wch: 20 }, // Nº de acompanhantes
       { wch: 35 }, // Nomes dos acompanhantes
-      { wch: 28 }, // Restrição alimentar
       { wch: 40 }, // Mensagem
       { wch: 22 }  // Data/hora da resposta
     ];

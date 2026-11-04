@@ -180,14 +180,14 @@
       <!-- Cabeçalho com Nome, Idade e Frase -->
       <header class="cabecalho-festa">
         <span class="tag-convite">✨ Convite Especial de Aniversário ✨</span>
-        <h1 class="nome-aniversariante" id="el-nome-aniversariante">Helena</h1>
+        <h1 class="nome-aniversariante" id="el-nome-aniversariante">Maria Eduarda</h1>
         <div class="badge-idade">
           <span>🌸</span>
-          <span id="el-idade">30 anos</span>
+          <span id="el-idade">21 anos</span>
           <span>🌸</span>
         </div>
         <p class="frase-convite" id="el-frase-convite">
-          Um novo ciclo floresce e a sua presença tornará nosso jardim ainda mais especial!
+          Um novo ciclo floresce e a sua presença tornará esse dia ainda mais especial!
         </p>
       </header>
 
@@ -229,14 +229,14 @@
         </svg>
       </div>
 
-      <!-- Informações da Festa (Data, Local com Mapa, Observações) -->
+      <!-- Informações da Festa (Data e Local com Mapa) -->
       <section class="grade-infos" aria-label="Informações do evento">
-        <!-- Data e Horário -->
+        <!-- Data -->
         <div class="item-info">
           <div class="icone-info rosa" aria-hidden="true">📅</div>
           <div class="conteudo-info">
-            <h3>Data e Horário</h3>
-            <p id="el-data-hora">12 de Dezembro de 2026, Sábado, às 16h00</p>
+            <h3>Data da Festa</h3>
+            <p id="el-data-hora">16 de Janeiro de 2027, Sábado</p>
           </div>
         </div>
 
@@ -244,13 +244,12 @@
         <div class="item-info">
           <div class="icone-info verde" aria-hidden="true">📍</div>
           <div class="conteudo-info">
-            <h3>Local da Festa</h3>
-            <p id="el-nome-local">Espaço Jardim das Flores</p>
-            <p class="subtexto-endereco" id="el-endereco-local">
-              Rua das Orquídeas, 250 - Jardim Botânico, São Paulo - SP
+            <h3 id="el-nome-local">Local da Festa</h3>
+            <p id="el-endereco-local">
+              R. Argino da Silva Leite, 181 - Santa Rita, Piracicaba - SP, 13423-215
             </p>
             <a
-              href="https://www.google.com/maps"
+              href="https://www.google.com/maps/search/?api=1&query=R.+Argino+da+Silva+Leite,+181+-+Santa+Rita,+Piracicaba+-+SP,+13423-215"
               target="_blank"
               rel="noopener noreferrer"
               class="botao-mapa"
@@ -258,17 +257,6 @@
             >
               🗺️ Ver no mapa
             </a>
-          </div>
-        </div>
-
-        <!-- Observações (Dress code, dicas, etc.) -->
-        <div class="item-info">
-          <div class="icone-info amarelo" aria-hidden="true">💐</div>
-          <div class="conteudo-info">
-            <h3>Observações &amp; Dress Code</h3>
-            <p id="el-observacoes">
-              Traje sugerido: Esporte Fino ou tons primaveris/florais.
-            </p>
           </div>
         </div>
       </section>
@@ -384,20 +372,6 @@
               </span>
               <div id="inputs-acompanhantes"></div>
             </div>
-          </div>
-
-          <!-- Restrição alimentar ou observação -->
-          <div class="grupo-campo">
-            <label class="rotulo-campo" for="campo-restricao">
-              Restrição alimentar ou observação <span class="opcional">(opcional)</span>
-            </label>
-            <input
-              type="text"
-              id="campo-restricao"
-              name="restricao_alimentar"
-              class="input-texto"
-              placeholder="Ex: Vegetariana, intolerância à lactose, alergia a camarão..."
-            />
           </div>
 
           <!-- Mensagem carinhosa para a aniversariante -->
