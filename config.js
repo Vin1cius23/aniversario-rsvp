@@ -35,7 +35,7 @@ const CONFIG_FESTA = {
   senhaAdmin: "flores123",
 
   // URL do Google Apps Script para salvar na Planilha do Google Drive (opcional, mas recomendado para o plano grátis do Render)
-  urlGoogleSheets: ""
+  urlGoogleSheets: "https://script.google.com/macros/s/AKfycbz4jr1Me5e4i4KWuZBaD4bODx8fqQy962lbyxobD9D6VLD-uGtXOf4AHYIRtWRTOks/exec"
 };
 
 module.exports = CONFIG_FESTA;
