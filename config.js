@@ -32,7 +32,10 @@ const CONFIG_FESTA = {
   fraseConvite: "Um novo ciclo floresce e a sua presença tornará esse dia ainda mais especial!",
 
   // Senha para acessar o Painel da Anfitriã em /admin
-  senhaAdmin: "flores123"
+  senhaAdmin: "flores123",
+
+  // URL do Google Apps Script para salvar na Planilha do Google Drive (opcional, mas recomendado para o plano grátis do Render)
+  urlGoogleSheets: ""
 };
 
 module.exports = CONFIG_FESTA;

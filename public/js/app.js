@@ -52,8 +52,8 @@ function aplicarDadosNaPagina() {
     DADOS_FESTA.linkMapa && DADOS_FESTA.linkMapa.trim() !== ""
       ? DADOS_FESTA.linkMapa
       : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-          DADOS_FESTA.enderecoLocal
-        )}`;
+        DADOS_FESTA.enderecoLocal
+      )}`;
   linkMapaEl.href = urlMapa;
 }
 

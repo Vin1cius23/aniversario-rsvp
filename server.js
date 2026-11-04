@@ -2,7 +2,7 @@
  * ============================================================================
  * 🌸 SERVIDOR BACKEND - SISTEMA DE CONFIRMAÇÃO DE PRESENÇA (RSVP) 🌸
  * ============================================================================
- * Tecnologias: Node.js + Express + SQLite3 + SheetJS (xlsx)
+ * Tecnologias: Node.js + Express + SQLite3 + Google Sheets (Apps Script) + SheetJS (xlsx)
  */
 
 const express = require("express");
@@ -52,8 +52,12 @@ db.serialize(() => {
 });
 
 // ============================================================================
-// FUNÇÕES AUXILIARES
+// FUNÇÕES AUXILIARES E INTEGRAÇÃO COM GOOGLE SHEETS
 // ============================================================================
+
+function obterUrlGoogleSheets() {
+  return (process.env.GOOGLE_SHEETS_URL || CONFIG_FESTA.urlGoogleSheets || "").trim();
+}
 
 /**
  * Remove tudo que não for número do telefone para evitar duplicidade
@@ -92,6 +96,33 @@ function autenticarAdmin(req, res, next) {
   next();
 }
 
+/**
+ * Busca todas as confirmações (do Google Sheets se configurado, ou do SQLite local)
+ */
+async function obterTodasConfirmacoes() {
+  const urlSheets = obterUrlGoogleSheets();
+  if (urlSheets) {
+    try {
+      const resposta = await fetch(urlSheets, { redirect: "follow" });
+      if (resposta.ok) {
+        const dados = await resposta.json();
+        if (Array.isArray(dados.respostas)) {
+          return dados.respostas;
+        }
+      }
+    } catch (erro) {
+      console.error("Aviso: falha ao consultar Google Sheets, usando SQLite local:", erro.message);
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    db.all("SELECT * FROM confirmacoes ORDER BY id DESC", [], (err, rows) => {
+      if (err) reject(err);
+      else resolve(rows || []);
+    });
+  });
+}
+
 // ============================================================================
 // ROTAS PÚBLICAS (CONVIDADOS)
 // ============================================================================
@@ -100,14 +131,14 @@ function autenticarAdmin(req, res, next) {
  * Retorna as informações da festa para o frontend (sem expor a senha de admin)
  */
 app.get("/api/config", (req, res) => {
-  const { senhaAdmin, ...dadosPublicos } = CONFIG_FESTA;
+  const { senhaAdmin, urlGoogleSheets, ...dadosPublicos } = CONFIG_FESTA;
   res.json(dadosPublicos);
 });
 
 /**
  * Recebe a confirmação de presença (ou atualiza caso o telefone já exista)
  */
-app.post("/api/rsvp", (req, res) => {
+app.post("/api/rsvp", async (req, res) => {
   try {
     const {
       nome,
@@ -178,7 +209,38 @@ app.post("/api/rsvp", (req, res) => {
     const dataHora = obterDataHoraBrasil();
     const telefoneFormatado = String(telefone || "").trim();
 
-    // Verifica se já existe uma confirmação com este mesmo telefone
+    // 1. Se o Google Sheets estiver configurado, salva direto na planilha online!
+    const urlSheets = obterUrlGoogleSheets();
+    let atualizadoSheets = null;
+
+    if (urlSheets) {
+      try {
+        const respSheets = await fetch(urlSheets, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          redirect: "follow",
+          body: JSON.stringify({
+            acao: "salvar",
+            nome: nomeLimpo,
+            telefone: telefoneFormatado,
+            telefone_limpo: telLimpo,
+            comparecer,
+            qtd_acompanhantes: qtdAcomp,
+            nomes_acompanhantes: listaNomesAcomp,
+            mensagem: mensagemLimpa,
+            data_resposta: dataHora
+          })
+        });
+        if (respSheets.ok) {
+          const jsonSheets = await respSheets.json();
+          atualizadoSheets = Boolean(jsonSheets.atualizado);
+        }
+      } catch (errSheets) {
+        console.error("Aviso: erro ao salvar no Google Sheets:", errSheets.message);
+      }
+    }
+
+    // 2. Salva também no SQLite local
     db.get(
       "SELECT id FROM confirmacoes WHERE telefone_limpo = ?",
       [telLimpo],
@@ -191,7 +253,6 @@ app.post("/api/rsvp", (req, res) => {
         }
 
         if (registroExistente) {
-          // Atualiza o registro existente (impede duplicidade)
           db.run(
             `UPDATE confirmacoes
              SET nome = ?,
@@ -224,7 +285,7 @@ app.post("/api/rsvp", (req, res) => {
 
               return res.json({
                 sucesso: true,
-                atualizado: true,
+                atualizado: atualizadoSheets !== null ? atualizadoSheets : true,
                 comparecer,
                 nome: nomeLimpo,
                 mensagemRetorno:
@@ -233,7 +294,6 @@ app.post("/api/rsvp", (req, res) => {
             }
           );
         } else {
-          // Insere nova confirmação
           db.run(
             `INSERT INTO confirmacoes (
               nome, telefone, telefone_limpo, comparecer,
@@ -261,7 +321,7 @@ app.post("/api/rsvp", (req, res) => {
 
               return res.status(201).json({
                 sucesso: true,
-                atualizado: false,
+                atualizado: atualizadoSheets !== null ? atualizadoSheets : false,
                 comparecer,
                 nome: nomeLimpo,
                 mensagemRetorno: "Sua resposta foi registrada com muito carinho!"
@@ -298,12 +358,9 @@ app.post("/api/admin/login", autenticarAdmin, (req, res) => {
 /**
  * Lista todas as confirmações e calcula os totais do resumo
  */
-app.get("/api/admin/rsvps", autenticarAdmin, (req, res) => {
-  db.all("SELECT * FROM confirmacoes ORDER BY id DESC", [], (err, rows) => {
-    if (err) {
-      console.error("Erro ao listar confirmações:", err);
-      return res.status(500).json({ erro: "Erro ao buscar respostas no banco de dados." });
-    }
+app.get("/api/admin/rsvps", autenticarAdmin, async (req, res) => {
+  try {
+    const rows = await obterTodasConfirmacoes();
 
     let totalConfirmados = 0; // Quantidade de convidados titulares que disseram "Sim"
     let totalRecusas = 0; // Quantidade de convidados titulares que disseram "Não"
@@ -330,16 +387,33 @@ app.get("/api/admin/rsvps", autenticarAdmin, (req, res) => {
       },
       respostas: rows
     });
-  });
+  } catch (err) {
+    console.error("Erro ao listar confirmações:", err);
+    return res.status(500).json({ erro: "Erro ao buscar respostas." });
+  }
 });
 
 /**
  * Exclui uma resposta específica pelo ID
  */
-app.delete("/api/admin/rsvps/:id", autenticarAdmin, (req, res) => {
-  const id = parseInt(req.params.id, 10);
+app.delete("/api/admin/rsvps/:id", autenticarAdmin, async (req, res) => {
+  const id = req.params.id;
   if (!id) {
     return res.status(400).json({ erro: "ID inválido." });
+  }
+
+  const urlSheets = obterUrlGoogleSheets();
+  if (urlSheets) {
+    try {
+      await fetch(urlSheets, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        redirect: "follow",
+        body: JSON.stringify({ acao: "excluir", id })
+      });
+    } catch (e) {
+      console.error("Aviso: erro ao excluir no Google Sheets:", e.message);
+    }
   }
 
   db.run("DELETE FROM confirmacoes WHERE id = ?", [id], function (err) {
@@ -354,14 +428,11 @@ app.delete("/api/admin/rsvps/:id", autenticarAdmin, (req, res) => {
 /**
  * Exporta todas as respostas em formato Excel (.xlsx) ou CSV (.csv)
  */
-app.get("/api/admin/export/:formato", autenticarAdmin, (req, res) => {
+app.get("/api/admin/export/:formato", autenticarAdmin, async (req, res) => {
   const formato = req.params.formato.toLowerCase();
 
-  db.all("SELECT * FROM confirmacoes ORDER BY id DESC", [], (err, rows) => {
-    if (err) {
-      console.error("Erro ao exportar planilha:", err);
-      return res.status(500).send("Erro ao gerar arquivo de exportação.");
-    }
+  try {
+    const rows = await obterTodasConfirmacoes();
 
     // Formata as colunas da planilha
     const dadosPlanilha = rows.map((r) => ({
@@ -374,7 +445,6 @@ app.get("/api/admin/export/:formato", autenticarAdmin, (req, res) => {
       "Data/hora da resposta": r.data_resposta
     }));
 
-    // Caso a lista esteja vazia, cria cabeçalhos em branco para a planilha não quebrar
     const cabecalhos = [
       "Nome",
       "Telefone",
@@ -390,7 +460,6 @@ app.get("/api/admin/export/:formato", autenticarAdmin, (req, res) => {
         ? XLSX.utils.json_to_sheet(dadosPlanilha, { header: cabecalhos })
         : XLSX.utils.aoa_to_sheet([cabecalhos]);
 
-    // Ajusta largura das colunas no Excel para ficar fácil de ler
     worksheet["!cols"] = [
       { wch: 28 }, // Nome
       { wch: 18 }, // Telefone
@@ -403,11 +472,10 @@ app.get("/api/admin/export/:formato", autenticarAdmin, (req, res) => {
 
     if (formato === "csv") {
       const csvConteudo = XLSX.utils.sheet_to_csv(worksheet, { FS: ";" });
-      // Adiciona BOM UTF-8 (\uFEFF) para que o Excel no Brasil abra acentos perfeitamente
       res.setHeader("Content-Type", "text/csv; charset=utf-8");
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="confirmacoes-presenca-${CONFIG_FESTA.nomeAniversariante.toLowerCase()}.csv"`
+        `attachment; filename="confirmacoes-presenca-${CONFIG_FESTA.nomeAniversariante.toLowerCase().replace(/\s+/g, "-")}.csv"`
       );
       return res.send("\uFEFF" + csvConteudo);
     } else {
@@ -421,11 +489,14 @@ app.get("/api/admin/export/:formato", autenticarAdmin, (req, res) => {
       );
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="confirmacoes-presenca-${CONFIG_FESTA.nomeAniversariante.toLowerCase()}.xlsx"`
+        `attachment; filename="confirmacoes-presenca-${CONFIG_FESTA.nomeAniversariante.toLowerCase().replace(/\s+/g, "-")}.xlsx"`
       );
       return res.send(bufferXlsx);
     }
-  });
+  } catch (err) {
+    console.error("Erro ao exportar planilha:", err);
+    return res.status(500).send("Erro ao gerar arquivo de exportação.");
+  }
 });
 
 // Inicialização do servidor
@@ -437,4 +508,3 @@ app.listen(PORT, () => {
   console.log(`🔑 Senha do Painel:     ${process.env.ADMIN_PASSWORD || CONFIG_FESTA.senhaAdmin}`);
   console.log("====================================================================");
 });
-
